@@ -29,6 +29,6 @@ class KamarModel extends Model
     // kamar → transaksi banyak
     public function transaksi()
     {
-        return $this->hasMany(TransaksiModel::class, 'id_kamar');
+        return $this->hasMany(TransaksiSewaModel::class, 'id_kamar');
     }
 }

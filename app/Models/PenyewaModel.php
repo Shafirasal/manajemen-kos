@@ -18,12 +18,14 @@ class PenyewaModel extends Model
         'nama',
         'alamat',
         'no_hp',
-        'jenis_kelamin'
+        'jenis_kelamin',
+        'foto_ktp',
+        'pekerjaan'
     ];
 
     public function transaksi()
 {
-    return $this->hasMany(TransaksiModel::class, 'id_penyewa');
+    return $this->hasMany(TransaksiSewaModel::class, 'id_penyewa');
 }
 
 }

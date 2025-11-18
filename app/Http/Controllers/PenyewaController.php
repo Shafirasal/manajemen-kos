@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\PenyewaModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class PenyewaController extends Controller
 {
@@ -31,7 +34,9 @@ class PenyewaController extends Controller
             'nama',
             'alamat',
             'no_hp',
-            'jenis_kelamin'
+            'jenis_kelamin',
+            'pekerjaan',
+            'foto_ktp'
         );
 
         return DataTables::of($data)
@@ -58,57 +63,90 @@ class PenyewaController extends Controller
             'alamat'        => 'required|string|max:225',
             'no_hp'         => 'required|string|max:13',
             'jenis_kelamin' => 'required|in:laki-laki,perempuan',
+            'pekerjaan'     => 'required|string|max:100',
+            'foto_ktp'      => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048'
         ]);
 
-        PenyewaModel::create($request->all());
+        $filePath = null;
+        
+        // Handle upload file - PERBAIKI: ganti 'file' jadi 'foto_ktp'
+        if ($request->hasFile('foto_ktp')) {
+            $originalName = pathinfo($request->file('foto_ktp')->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $request->file('foto_ktp')->getClientOriginalExtension();
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
+            $request->file('foto_ktp')->storeAs('public/penyewa/ktp', $filename);
+            $filePath = 'penyewa/ktp/' . $filename;
+        }
+
+        // Membuat data penyewa
+        $data = new PenyewaModel();
+        $data->nama = $request->nama;
+        $data->alamat = $request->alamat;
+        $data->no_hp = $request->no_hp;
+        $data->jenis_kelamin = $request->jenis_kelamin;
+        $data->pekerjaan = $request->pekerjaan;
+        $data->foto_ktp = $filePath;  // ✅ PERBAIKI: ganti forceDestroy jadi foto_ktp
+        $data->save();
 
         return response()->json([
             'status'  => true,
             'message' => 'Data penyewa berhasil disimpan.'
-        ]);
+        ], 200);
     }
 
     public function show($id)
     {
-        $penyewa = PenyewaModel::find($id);
-
-        if (!$penyewa) {
-            abort(404);
-        }
-
+        $penyewa = PenyewaModel::findOrFail($id);
         return view('penyewa.show', compact('penyewa'));
     }
 
     public function edit($id)
     {
-        $penyewa = PenyewaModel::find($id);
-
-        if (!$penyewa) {
-            abort(404);
-        }
-
+        $penyewa = PenyewaModel::findOrFail($id);
         return view('penyewa.edit', compact('penyewa'));
     }
 
     public function update(Request $request, $id)
     {
-        $penyewa = PenyewaModel::find($id);
+        $penyewa = PenyewaModel::findOrFail($id);
 
-        if (!$penyewa) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Data tidak ditemukan.'
-            ]);
-        }
-
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama'          => 'required|string|max:50',
             'alamat'        => 'required|string|max:225',
             'no_hp'         => 'required|string|max:13',
             'jenis_kelamin' => 'required|in:laki-laki,perempuan',
+            'pekerjaan'     => 'required|string|max:100',
+            'foto_ktp'      => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048'
         ]);
 
-        $penyewa->update($validated);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->only([
+            'nama',
+            'alamat',
+            'no_hp',
+            'jenis_kelamin',
+            'pekerjaan'
+        ]);
+
+        // Handle upload file baru - PERBAIKI: ganti 'file' jadi 'foto_ktp'
+        if ($request->hasFile('foto_ktp')) {
+            // Hapus file lama jika ada
+            if ($penyewa->foto_ktp && Storage::exists('public/' . $penyewa->foto_ktp)) {
+                Storage::delete('public/' . $penyewa->foto_ktp);
+            }
+
+            // Upload file baru
+            $originalName = pathinfo($request->file('foto_ktp')->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $request->file('foto_ktp')->getClientOriginalExtension();
+            $filename = time() . '_' . Str::slug($originalName) . '.' . $extension;
+            $request->file('foto_ktp')->storeAs('public/penyewa/ktp', $filename);
+            $data['foto_ktp'] = 'penyewa/ktp/' . $filename;
+        }
+
+        $penyewa->update($data);
 
         return response()->json([
             'status'  => true,
@@ -118,12 +156,7 @@ class PenyewaController extends Controller
 
     public function confirm($id)
     {
-        $penyewa = PenyewaModel::find($id);
-
-        if (!$penyewa) {
-            abort(404);
-        }
-
+        $penyewa = PenyewaModel::findOrFail($id);
         return view('penyewa.confirm', compact('penyewa'));
     }
 
@@ -137,6 +170,11 @@ class PenyewaController extends Controller
                     'status'  => false,
                     'message' => 'Data tidak ditemukan.'
                 ]);
+            }
+
+            // Hapus file jika ada - PERBAIKI: ganti 'file' jadi 'foto_ktp'
+            if ($penyewa->foto_ktp && Storage::exists('public/' . $penyewa->foto_ktp)) {
+                Storage::delete('public/' . $penyewa->foto_ktp);
             }
 
             $penyewa->delete();

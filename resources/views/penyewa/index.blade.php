@@ -37,6 +37,7 @@
                   <th>Alamat</th>
                   <th>No HP</th>
                   <th>Jenis Kelamin</th>
+                  <th>File KTP</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -112,6 +113,22 @@
           orderable: true,
           searchable: true
         },
+        {
+            data: 'foto_ktp',
+            className: '',
+            render: function (data, type, row) {
+              if (!data) return '-';
+
+              // Ambil nama file dari path
+              const fileName = data.split('/').pop().replace(/^\d{10}_/, '');
+
+              return `
+                <a href="/storage/${data}" download="${fileName}" title="Klik untuk download">
+                  ${fileName}
+                </a>
+              `;
+            }
+          },
         {
           data: 'aksi',
           className: 'text-center',

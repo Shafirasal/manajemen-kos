@@ -1,4 +1,4 @@
-<form action="{{ url('/penyewa/store') }}" method="POST" id="form-tambah">
+<form action="{{ url('/penyewa/store') }}" method="POST" id="form-tambah" enctype="multipart/form-data">
     @csrf
     <div id="modal-master" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -16,7 +16,11 @@
                     <input type="text" name="nama" id="nama" class="form-control" required>
                     <small id="error-nama" class="error-text form-text text-danger"></small>
                 </div>
-
+                <div class="form-group">
+                    <label>Pekerjaan</label>
+                    <input type="text" name="pekerjaan" id="pekerjaan" class="form-control" required>
+                    <small id="error-pekerjaan" class="error-text form-text text-danger"></small>
+                </div>
                 <div class="form-group">
                     <label>Alamat</label>
                     <textarea name="alamat" id="alamat" class="form-control" required></textarea>
@@ -39,6 +43,11 @@
                     <small id="error-jenis_kelamin" class="error-text form-text text-danger"></small>
                 </div>
 
+                <div class="form-group">
+                    <label>Foto KTP</label>
+                    <input type="file" name="foto_ktp" id="foto_ktp" class="form-control-file">
+                    <small id="error-foto_ktp" class="error-text form-text text-danger"></small>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -59,13 +68,18 @@ $(document).ready(function() {
             alamat: { required: true },
             no_hp: { required: true, minlength: 1,maxlength: 13 },
             jenis_kelamin: { required: true },
+            pekerjaan: { required: true },
+            foto_ktp:{required: true, extension: "pdf|jpg|jpeg|png" }
         },
 
         submitHandler: function(form) {
+            var formData = new FormData(form);
             $.ajax({
                 url: form.action,
                 type: form.method,
-                data: $(form).serialize(),
+                data: formData, 
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     if (response.status) {
                         $('#myModal').modal('hide');

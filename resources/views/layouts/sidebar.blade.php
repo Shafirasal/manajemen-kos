@@ -1,7 +1,7 @@
 <div class="main-sidebar sidebar-style-2">
   <aside id="sidebar-wrapper">
     <div class="sidebar-brand">
-      <a href="index.html">Stisla</a>
+      <a href="index.html">SIKOS</a>
     </div>
     <div class="sidebar-brand sidebar-brand-sm">
       <a href="index.html">St</a>
@@ -22,9 +22,9 @@
           <span>Data Master</span></a>
         <ul class="dropdown-menu">
           <li><a class="nav-link" href="{{ url('/penyewa') }}">Penyewa</a></li>
-          <li><a class="nav-link" href="layout-transparent.html">Tipe Kamar</a></li>
-          <li><a class="nav-link" href="layout-top-navigation.html">Kamar</a></li>
-          <li><a class="nav-link" href="layout-top-navigation.html">Transaksi</a></li>
+          <li><a class="nav-link" href="{{ url('/tipe_kamar') }}">Tipe Kamar</a></li>
+          <li><a class="nav-link" href="{{ url('/kamar') }}">Kamar</a></li>
+          <li><a class="nav-link" href="{{ url('/transaksi_sewa') }}">Transaksi Sewa</a></li>
         </ul>
       </li>
 

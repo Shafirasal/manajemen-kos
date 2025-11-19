@@ -3,7 +3,7 @@
 use App\Http\Controllers\KamarController;
 use App\Http\Controllers\PenyewaController;
 use App\Http\Controllers\TipeKamarController;
-use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\TransaksiSewaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -47,14 +47,14 @@ Route::get('/', function () {
         Route::delete('/{id}/delete', [KamarController::class, 'delete']);
     });
 
-        Route::prefix('transaksi')->name('transaksi.')->group(function () {
-        Route::post('/list', [TransaksiController::class, 'list']);
-        Route::get('/', [TransaksiController::class, 'index']);
-        Route::get('/create', [TransaksiController::class, 'create']);
-        Route::post('/store', [TransaksiController::class, 'store']);
-        Route::get('/{id}/show', [TransaksiController::class, 'show']);
-        Route::get('/{id}/edit', [TransaksiController::class, 'edit']);
-        Route::put('/{id}/update', [TransaksiController::class, 'update']);
-        Route::get('/{id}/confirm', [TransaksiController::class, 'confirm']);
-        Route::delete('/{id}/delete', [TransaksiController::class, 'delete']);
+        Route::prefix('transaksi_sewa')->name('transaksi_sewa.')->group(function () {
+        Route::post('/list', [TransaksiSewaController::class, 'list']);
+        Route::get('/', [TransaksiSewaController::class, 'index']);
+        Route::get('/create', [TransaksiSewaController::class, 'create']);
+        Route::post('/store', [TransaksiSewaController::class, 'store']);
+        Route::get('/{id}/show', [TransaksiSewaController::class, 'show']);
+        Route::get('/{id}/edit', [TransaksiSewaController::class, 'edit']);
+        Route::put('/{id}/update', [TransaksiSewaController::class, 'update']);
+        Route::get('/{id}/confirm', [TransaksiSewaController::class, 'confirm']);
+        Route::delete('/{id}/delete', [TransaksiSewaController::class, 'delete']);
     });

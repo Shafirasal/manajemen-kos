@@ -22,6 +22,11 @@ class TransaksiSewaModel extends Model
         'tanggal_batas_sewa',
         'status'
     ];
+    protected $casts = [
+    'tanggal_sewa' => 'datetime',
+    'tanggal_batas_sewa' => 'datetime',
+];
+
 
     // transaksi → penyewa
     public function penyewa()

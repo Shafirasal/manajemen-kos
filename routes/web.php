@@ -3,6 +3,7 @@
 use App\Http\Controllers\KamarController;
 use App\Http\Controllers\PenyewaController;
 use App\Http\Controllers\TipeKamarController;
+use App\Http\Controllers\TransaksiPembayaranController;
 use App\Http\Controllers\TransaksiSewaController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,4 +58,16 @@ Route::get('/', function () {
         Route::put('/{id}/update', [TransaksiSewaController::class, 'update']);
         Route::get('/{id}/confirm', [TransaksiSewaController::class, 'confirm']);
         Route::delete('/{id}/delete', [TransaksiSewaController::class, 'delete']);
+    });
+
+        Route::prefix('transaksi_pembayaran')->name('transaksi_pembayaran.')->group(function () {
+        Route::post('/list', [TransaksiPembayaranController::class, 'list']);
+        Route::get('/', [TransaksiPembayaranController::class, 'index']);
+        Route::get('/create', [TransaksiPembayaranController::class, 'create']);
+        Route::post('/store', [TransaksiPembayaranController::class, 'store']);
+        Route::get('/{id}/show', [TransaksiPembayaranController::class, 'show']);
+        Route::get('/{id}/edit', [TransaksiPembayaranController::class, 'edit']);
+        Route::put('/{id}/update', [TransaksiPembayaranController::class, 'update']);
+        Route::get('/{id}/confirm', [TransaksiPembayaranController::class, 'confirm']);
+        Route::delete('/{id}/delete', [TransaksiPembayaranController::class, 'delete']);
     });

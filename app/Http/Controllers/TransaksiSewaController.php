@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\PenyewaModel;
 use App\Models\KamarModel;
+use App\Models\TransaksiPembayaranModel;
 use App\Models\TransaksiSewaModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -499,6 +500,32 @@ public function list(Request $request)
         'status'             => $statusBaru,
     ]);
 
+
+//   AUTO GENERATE TAGIHAN TAMBAHAN JIKA LAMA SEWA  DITAMBAH
+
+    $jumlahPembayaran = TransaksiPembayaranModel::where('id_transaksi_sewa', $transaksi->id_transaksi_sewa)->count();
+
+    if ($lamaSewa > $jumlahPembayaran) {
+
+        // $selisih = $lamaSewa - $jumlahPembayaran;
+
+        $hargaPerBulan = $transaksi->kamar->tipeKamar->harga_perbulan;
+        $tanggalSewa = Carbon::parse($transaksi->tanggal_sewa);
+
+        for ($i = $jumlahPembayaran + 1; $i <= $lamaSewa; $i++) {
+
+            $tanggalJatuhTempo = $tanggalSewa->copy()->addMonths($i - 1);
+
+            TransaksiPembayaranModel::create([
+                'id_transaksi_sewa' => $transaksi->id_transaksi_sewa,
+                'tanggal_bayar' => null,
+                'tanggal_jatuh_tempo' => $tanggalJatuhTempo,
+                'uraian' => "Tagihan bulan ke-$i",
+                'nominal' => $hargaPerBulan,
+                'status' => 'tidak_bayar',
+            ]);
+        }
+    }
     return response()->json([
         'status' => true,
         'message' => 'Transaksi berhasil diperbarui'

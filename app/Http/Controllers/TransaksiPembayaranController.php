@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
 
 class TransaksiPembayaranController extends Controller
 {
@@ -83,19 +85,37 @@ class TransaksiPembayaranController extends Controller
         //     '
         //     ;
         // })
+
+        // ->addColumn('aksi', function ($row) {
+        //     $btnEdit = $row->status !== 'bayar'
+        //         ? '<button class="btn btn-warning btn-sm" onclick="modalAction(`' . url('/transaksi_pembayaran/' . $row->id_transaksi_pembayaran . '/edit') . '`)">Bayar</button>'
+        //         : '';
+
+        //     return '
+        //         <button class="btn btn-info btn-sm" onclick="modalAction(`' . url('/transaksi_pembayaran/' . $row->id_transaksi_pembayaran . '/show') . '`)">Detail</button>
+        //         ' . $btnEdit . '
+
+        //     '
+        //     ;
+        // })
         ->addColumn('aksi', function ($row) {
-            $btnEdit = $row->status !== 'bayar'
-                ? '<button class="btn btn-warning btn-sm" onclick="modalAction(`' . url('/transaksi_pembayaran/' . $row->id_transaksi_pembayaran . '/edit') . '`)">Bayar</button>'
+
+            $btnBayar = $row->status !== 'bayar'
+                ? '<button class="btn btn-warning btn-sm"
+                    onclick="modalAction(`' . url('/transaksi_pembayaran/' . $row->id_transaksi_pembayaran . '/edit') . '`)">
+                    Bayar
+                </button>'
                 : '';
 
-            return '
-                <button class="btn btn-info btn-sm" onclick="modalAction(`' . url('/transaksi_pembayaran/' . $row->id_transaksi_pembayaran . '/show') . '`)">Detail</button>
-                ' . $btnEdit . '
+            $btnCetak = $row->status === 'bayar'
+                ? '<button class="btn btn-info btn-sm"
+                    onclick="window.location.href=\'' . url('/transaksi_pembayaran/' . $row->id_transaksi_pembayaran . '/generatePembayaran') . '\'">
+                    Cetak
+                </button>'
+                : '';
 
-            '
-            ;
+            return $btnBayar . ' ' . $btnCetak;
         })
-
         ->rawColumns(['aksi', 'status_badge'])
         ->make(true);
 }
@@ -764,4 +784,218 @@ public function update(Request $request, $id)
         'message' => 'Pembayaran sudah pernah dibuat. Gunakan menu Bayar untuk melunasi tagihan berikutnya.'
     ]);
 }
+
+
+// public function generateDocx($id)
+// {
+//     $pembayaran = TransaksiPembayaranModel::with([
+//         'transaksiSewa.penyewa',
+//         'transaksiSewa.kamar.tipekamar'
+//     ])->find($id);
+
+//     if (!$pembayaran) {
+//         return back()->with('error', 'Data pembayaran tidak ditemukan.');
+//     }
+
+//     $sewa    = $pembayaran->transaksiSewa;
+//     $penyewa = $sewa->penyewa;
+//     $kamar   = $sewa->kamar;
+//     $tipe    = $sewa->kamar->tipekamar;
+ 
+
+//     $phpWord = new PhpWord();
+//     $section = $phpWord->addSection([
+//         'marginLeft' => 1000,
+//         'marginRight' => 1000,
+//         'marginTop' => 800,
+//         'marginBottom' => 800,
+//     ]);
+
+//     // Judul
+//     $section->addText(
+//         'BUKTI PEMBAYARAN',
+//         ['bold' => true, 'size' => 16],
+//         ['alignment' => 'center']
+//     );
+//     $section->addTextBreak(1);
+
+//     // Tanggal pembayaran
+//     $section->addText("Tanggal Pembayaran: " . Carbon::parse($pembayaran->tanggal_bayar)->format('d-m-Y'));
+//     $section->addTextBreak(1);
+
+//     $section->addText("DATA PENYEWA", ['bold' => true, 'size' => 12]);
+//     $table = $section->addTable();
+
+//     $table->addRow();
+//     $table->addCell(3000)->addText("Nama Penyewa");
+//     $table->addCell(8000)->addText(": " . ($penyewa->nama ?? '-'));
+
+//     $table->addRow();
+//     $table->addCell(3000)->addText("Nomor HP");
+//     $table->addCell(8000)->addText(": " . ($penyewa->no_hp ?? '-'));
+
+//     $table->addRow();
+//     $table->addCell(3000)->addText("Kamar");
+//     $table->addCell(8000)->addText(": " . ($kamar->no_kamar ?? '-'));
+
+//     $table->addRow();
+//     $table->addCell(3000)->addText("Tipe Kamar");
+//     $table->addCell(8000)->addText(": " . ($tipe->jenis_tipe_kamar ?? '-'));
+
+//     $section->addTextBreak(1);
+
+
+//     $section->addText("DETAIL PEMBAYARAN", ['bold' => true, 'size' => 12]);
+//     $table2 = $section->addTable();
+
+//     $table2->addRow();
+//     $table2->addCell(3000)->addText("Nominal Dibayar");
+//     $table2->addCell(8000)->addText(": Rp " . number_format($pembayaran->nominal, 0, ',', '.'));
+
+//     $table2->addRow();
+//     $table2->addCell(3000)->addText("Status");
+//     $table2->addCell(8000)->addText(": " . strtoupper($pembayaran->status));
+
+//     $table2->addRow();
+//     $table2->addCell(3000)->addText("Uraian");
+//     $table2->addCell(8000)->addText(": " . ($pembayaran->uraian ?? '-'));
+
+//     $section->addTextBreak(1);
+
+//     //ringkasan
+//     $section->addText("RINGKASAN", ['bold' => true, 'size' => 12]);
+
+//     $section->addText(
+//         "Telah diterima pembayaran sewa kamar sebesar Rp " .
+//         number_format($pembayaran->nominal, 0, ',', '.')
+//     );
+
+//     $section->addText("Atas nama : " . ($penyewa->nama ?? '-'));
+//     $section->addText("Untuk kamar : " . ($kamar->no_kamar ?? '-'));
+//     $section->addTextBreak(3);
+
+//     $section->addText("Pengelola Kos,", []);
+//     $section->addTextBreak(4);
+//     $section->addText("__________________________", []);
+//     $section->addText("Tanda Tangan", []);
+
+//     // File name
+//     $filename = 'Bukti_Pembayaran_' . $pembayaran->id_transaksi_pembayaran . '.docx';
+//     $path = storage_path('app/public/' . $filename);
+
+//     $phpWord->save($path, 'Word2007');
+
+//     return response()->download($path)->deleteFileAfterSend(true);
+// }
+
+public function generatePembayaran($id)
+{
+    $pembayaran = TransaksiPembayaranModel::with([
+        'transaksiSewa.penyewa',
+        'transaksiSewa.kamar.tipekamar'
+    ])->find($id);
+
+    if (!$pembayaran) {
+        return back()->with('error', 'Data pembayaran tidak ditemukan.');
+    }
+
+    $sewa    = $pembayaran->transaksiSewa;
+    $penyewa = $sewa->penyewa;
+    $kamar   = $sewa->kamar;
+    $tipe    = $kamar->tipekamar;
+
+    $phpWord = new PhpWord();
+    $section = $phpWord->addSection([
+        'marginLeft' => 1000,
+        'marginRight' => 1000,
+        'marginTop' => 800,
+        'marginBottom' => 800,
+    ]);
+
+    // Judul
+    $section->addText(
+        'BUKTI PEMBAYARAN',
+        ['bold' => true, 'size' => 16],
+        ['alignment' => 'center']
+    );
+    $section->addTextBreak(1);
+
+    // Tanggal pembayaran
+    $section->addText("Tanggal Pembayaran: " . Carbon::parse($pembayaran->tanggal_bayar)->format('d-m-Y'));
+    $section->addTextBreak(1);
+
+    // Data penyewa
+    $section->addText("DATA PENYEWA", ['bold' => true, 'size' => 12]);
+    $table = $section->addTable();
+
+    $table->addRow();
+    $table->addCell(3000)->addText("Nama Penyewa");
+    $table->addCell(8000)->addText(": " . ($penyewa->nama ?? '-'));
+
+    $table->addRow();
+    $table->addCell(3000)->addText("Nomor HP");
+    $table->addCell(8000)->addText(": " . ($penyewa->no_hp ?? '-'));
+
+    $table->addRow();
+    $table->addCell(3000)->addText("Kamar");
+    $table->addCell(8000)->addText(": " . ($kamar->no_kamar ?? '-'));
+
+    $table->addRow();
+    $table->addCell(3000)->addText("Tipe Kamar");
+    $table->addCell(8000)->addText(": " . ($tipe->jenis_tipe_kamar ?? '-'));
+
+    $section->addTextBreak(1);
+
+    //detail pembayaran
+    $section->addText("DETAIL PEMBAYARAN", ['bold' => true, 'size' => 12]);
+    $table2 = $section->addTable();
+
+    $table2->addRow();
+    $table2->addCell(3000)->addText("Nominal Dibayar");
+    $table2->addCell(8000)->addText(": Rp " . number_format($pembayaran->nominal, 0, ',', '.'));
+
+    $table2->addRow();
+    $table2->addCell(3000)->addText("Status");
+    $table2->addCell(8000)->addText(": " . strtoupper($pembayaran->status));
+
+    $table2->addRow();
+    $table2->addCell(3000)->addText("Uraian");
+    $table2->addCell(8000)->addText(": " . ($pembayaran->uraian ?? '-'));
+
+    $section->addTextBreak(1);
+
+    //ringkasan
+    $section->addText("RINGKASAN", ['bold' => true, 'size' => 12]);
+
+    $section->addText(
+        "Telah diterima pembayaran sewa kamar sebesar Rp " .
+        number_format($pembayaran->nominal, 0, ',', '.')
+    );
+
+    $section->addText("Atas nama : " . ($penyewa->nama ?? '-'));
+    $section->addText("Untuk kamar : " . ($kamar->no_kamar ?? '-'));
+    $section->addTextBreak(3);
+
+    $section->addText("Pengelola Kos,", []);
+    $section->addTextBreak(4);
+
+    $section->addText("__________________________", []);
+    $section->addText("Tanda Tangan", []);
+
+
+    // Nama file mengikuti pola perjanjian (rapi)
+    $nameClean = str_replace(' ', '_', $penyewa->nama);
+    $fileName = "Bukti_Pembayaran_{$nameClean}_{$pembayaran->id_transaksi_pembayaran}.docx";
+
+    $filePath = storage_path("app/public/{$fileName}");
+
+    // Save using same format as perjanjian sewa
+    $writer = IOFactory::createWriter($phpWord, 'Word2007');
+    $writer->save($filePath);
+
+    return response()->download($filePath)->deleteFileAfterSend(true);
+
+    
+}
+
 }

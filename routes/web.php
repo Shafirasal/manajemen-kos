@@ -86,4 +86,5 @@ Route::get('/', function () {
         Route::put('/{id}/update', [TransaksiPembayaranController::class, 'update']);
         Route::get('/{id}/confirm', [TransaksiPembayaranController::class, 'confirm']);
         Route::delete('/{id}/delete', [TransaksiPembayaranController::class, 'delete']);
+        Route::get('/{id}/generatePembayaran', [TransaksiPembayaranController::class, 'generatePembayaran']);
     });

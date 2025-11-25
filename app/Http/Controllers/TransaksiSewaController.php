@@ -10,6 +10,9 @@ use App\Models\TransaksiSewaModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Style\ListItem;
 
 class TransaksiSewaController extends Controller
 {
@@ -75,10 +78,11 @@ public function list(Request $request)
             return '<span class="badge badge-' . $color . '">' . strtoupper($row->status) . '</span>';
         })
         ->addColumn('aksi', function ($row) {
+            $urlDocx = url('/transaksi_sewa/' . $row->id_transaksi_sewa . '/generateDocx');
+
             return '
-                <button class="btn btn-info btn-sm"
-                    onclick="modalAction(`' . url('/transaksi_sewa/' . $row->id_transaksi_sewa . '/show') . '`)">
-                    Detail
+                <button class="btn btn-info btn-sm" onclick="window.location.href=\'' . $urlDocx . '\'">
+                    Cetak
                 </button>
                 <button class="btn btn-warning btn-sm"
                     onclick="modalAction(`' . url('/transaksi_sewa/' . $row->id_transaksi_sewa . '/edit') . '`)">
@@ -531,6 +535,125 @@ public function list(Request $request)
         'message' => 'Transaksi berhasil diperbarui'
     ]);
 }
+
+
+
+public function generateDocx($id)
+{
+$transaksi = TransaksiSewaModel::with(['penyewa', 'kamar.tipekamar'])->find($id);
+
+
+    if (!$transaksi) {
+        return redirect()->back()->with('error', 'Data transaksi tidak ditemukan.');
+    }
+
+    $penyewa = $transaksi->penyewa;
+    $kamar   = $transaksi->kamar;
+$tipekamar = $transaksi->kamar->tipekamar;
+$harga = $tipekamar->harga_perbulan ?? 0;
+    $phpWord = new PhpWord();
+
+    // Set margin agar rapi
+    $section = $phpWord->addSection([
+        'marginLeft'   => 1200,
+        'marginRight'  => 1200,
+        'marginTop'    => 800,
+        'marginBottom' => 800,
+    ]);
+
+    // Style paragraf utama (justify, spacing rapi)
+    $paragraph = ['alignment' => 'both', 'spaceAfter' => 200];
+
+    // JUDUL
+    $section->addText(
+        'PERJANJIAN SEWA KAMAR KOS',
+        ['bold' => true, 'size' => 16],
+        ['alignment' => 'center']
+    );
+    $section->addTextBreak(1);
+
+    // BAGIAN HEAD
+    $section->addText("Yang bertanda tangan di bawah ini:", ['size' => 12], $paragraph);
+
+    $section->addText("PIHAK PERTAMA (Pemilik Kos)", ['bold' => true], $paragraph);
+    $section->addText("Nama: MAS'ODI", [], $paragraph);
+    $section->addText("Alamat: WONOREJO SELATAN V/9", [], $paragraph);
+    $section->addTextBreak(1);
+
+    $section->addText("PIHAK KEDUA (Penyewa Kos)", ['bold' => true], $paragraph);
+    $section->addText("Nama: {$penyewa->nama}", [], $paragraph);
+    // $section->addText("No. Identitas: " . ($penyewa->nik ?? '-'), [], $paragraph);
+    $section->addText("Jenis Kelamin: " . ($penyewa->jenis_kelamin ?? '-'), [], $paragraph);
+    $section->addText("Pekerjaan: " . ($penyewa->pekerjaan ?? '-'), [], $paragraph);
+    $section->addText("Alamat: " . ($penyewa->alamat ?? '-'), [], $paragraph);
+    $section->addTextBreak(1);
+
+    // LIST KETENTUAN
+    $section->addText(
+        "Pihak Pertama setuju menyewakan kamar kos kepada Pihak Kedua dengan ketentuan berikut:",
+        [],
+        $paragraph
+    );
+
+    $listStyle = ['listType' => ListItem::TYPE_NUMBER];
+
+
+    $section->addListItem("Nomor Kamar: {$kamar->no_kamar}", 0, [], $listStyle);
+    $section->addListItem("Masa sewa: {$transaksi->lama_sewa} bulan (Mulai: {$transaksi->tanggal_sewa} s/d {$transaksi->tanggal_batas_sewa})", 0, [], $listStyle);
+    $section->addListItem("Biaya Sewa: Rp " . number_format($harga, 0, ',', '.') . " /bulan", 0, [],$listStyle );
+    $section->addListItem("Penyewa wajib menyerahkan fotokopi kartu identitas kepada pemilik kos.", 0, [], $listStyle);
+    $section->addListItem("Penyewa kamar kos diminta secara menyeluruh mengetahui, memahami dan menaati peraturan dan tata tertib rumah kos yang telah ditetapkan olek pemilik. Serta wajib mematuhi peraturan perundang-undangan (termasuk namun tidak terbatas pada: larangan penyalahgunaan narkotika, minuman keras, kekerasan/kejahatan seksual, terorisme, dst.).", 0, [], $listStyle);
+    $section->addListItem("Kehilangan/kerusakan barang-barang fasilitas kamar kos yang disebabkan oleh penyewa kamar kos baik secara sengaja ataupun tidak sengaja akan dikenakan denda atau penyewa diwajibkan untuk mengganti barang yang dirusakan.", 0, [], $listStyle);
+    $section->addListItem("Barang pribadi sepenuhnya tanggung jawab penyewa.", 0, [], $listStyle);
+    $section->addListItem("Tamu dilarang menginap tanpa izin pemilik kos.", 0, [], $listStyle);
+    $section->addListItem("Para pihak telah memahami dan menyetujui perjanjian ini.", 0, [], $listStyle);
+
+    $section->addTextBreak(1);
+
+    // PENUTUP
+    $section->addText(
+        "Demikian perjanjian ini dibuat pada tanggal " . date('d-m-Y') . " tanpa paksaan dari pihak manapun.",
+        [],
+        $paragraph
+    );
+
+    // Jarak sedikit
+    $section->addTextBreak(1);
+
+    // Tabel tanda tangan
+    $table = $section->addTable([
+        'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER,
+        'cellMargin' => 80,
+        'borderSize' => 0,
+        'borderColor' => 'ffffff' 
+
+    ]);
+
+    // Row 1: Judul pihak
+    $table->addRow();
+    $table->addCell(3500)->addText("PIHAK PERTAMA", ['bold' => true], ['alignment' => 'center']);
+    $table->addCell(3500)->addText("PIHAK KEDUA", ['bold' => true], ['alignment' => 'center']);
+
+    // Row 2: Kosong untuk tanda tangan
+    $table->addRow();
+    $table->addCell(3500)->addText("\n\n\n\n\n", [], ['alignment' => 'center']);
+    $table->addCell(3500)->addText("\n\n\n\n\n", [], ['alignment' => 'center']);
+
+    // Row 3: Nama di bawah
+    $table->addRow();
+    $table->addCell(3500)->addText("(MAS'ODI)", [], ['alignment' => 'center']);
+    $table->addCell(3500)->addText("({$penyewa->nama})", [], ['alignment' => 'center']);
+
+    // SIMPAN
+    $fileName = "Perjanjian_Sewa_{$penyewa->nama}.docx";
+    $filePath = storage_path("app/public/{$fileName}");
+
+    $writer = IOFactory::createWriter($phpWord, 'Word2007');
+    $writer->save($filePath);
+
+    return response()->download($filePath)->deleteFileAfterSend(true);
+}
+
 
 }
 

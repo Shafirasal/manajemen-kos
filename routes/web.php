@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\KamarController;
+use App\Http\Controllers\PengelolaController;
 use App\Http\Controllers\PenyewaController;
 use App\Http\Controllers\TipeKamarController;
 use App\Http\Controllers\TransaksiPembayaranController;
@@ -22,6 +23,18 @@ Route::get('/', function () {
         Route::put('/{id}/update', [PenyewaController::class, 'update']);
         Route::get('/{id}/confirm', [PenyewaController::class, 'confirm']);
         Route::delete('/{id}/delete', [PenyewaController::class, 'delete']);
+    });
+        
+    Route::prefix('pengelola')->name('pengelola.')->group(function () {
+        Route::post('/list', [PengelolaController::class, 'list']);
+        Route::get('/', [PengelolaController::class, 'index']);
+        Route::get('/create', [PengelolaController::class, 'create']);
+        Route::post('/store', [PengelolaController::class, 'store']);
+        Route::get('/{id}/show', [PengelolaController::class, 'show']);
+        Route::get('/{id}/edit', [PengelolaController::class, 'edit']);
+        Route::put('/{id}/update', [PengelolaController::class, 'update']);
+        Route::get('/{id}/confirm', [PengelolaController::class, 'confirm']);
+        Route::delete('/{id}/delete', [PengelolaController::class, 'delete']);
     });
 
         Route::prefix('tipe_kamar')->name('tipe_kamar.')->group(function () {
@@ -58,6 +71,9 @@ Route::get('/', function () {
         Route::put('/{id}/update', [TransaksiSewaController::class, 'update']);
         Route::get('/{id}/confirm', [TransaksiSewaController::class, 'confirm']);
         Route::delete('/{id}/delete', [TransaksiSewaController::class, 'delete']);
+        Route::get('/{id}/generateDocx', [TransaksiSewaController::class, 'generateDocx']);
+
+
     });
 
         Route::prefix('transaksi_pembayaran')->name('transaksi_pembayaran.')->group(function () {

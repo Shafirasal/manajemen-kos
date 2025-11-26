@@ -28,4 +28,8 @@ class PenyewaModel extends Model
     return $this->hasMany(TransaksiSewaModel::class, 'id_penyewa');
 }
 
+    public function user()
+    {
+        return $this->hasOne(UserModel::class, 'id_penyewa', 'id_penyewa');
+    }
 }

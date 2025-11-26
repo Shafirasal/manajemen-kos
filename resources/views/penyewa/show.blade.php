@@ -13,7 +13,7 @@
 
         <tr>
           <th class="text-right col-4">Nama Penyewa</th>
-          <td class="col-8">{{ $penyewa->nama_penyewa }}</td>
+          <td class="col-8">{{ $penyewa->nama}}</td>
         </tr>
 
         <tr>

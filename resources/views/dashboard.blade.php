@@ -14,7 +14,7 @@
     <div class="section-body">
 
         <div class="alert alert-primary">
-            Selamat datang, <strong>{{ Auth::check() ? Auth::user()->username : 'Guest' }}</strong>!
+            Selamat datang, <strong>{{ Auth::user()->pengelola?->nama ?? Auth::user()->penyewa?->nama ?? Auth::user()->username }}</strong>!
         </div>
 
         <div class="row">

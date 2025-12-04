@@ -1,10 +1,12 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserModel extends Model
+class UserModel extends Authenticatable
 {
     protected $table = 't_user';
     protected $primaryKey = 'id_user';

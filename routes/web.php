@@ -1,18 +1,35 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KamarController;
 use App\Http\Controllers\PengelolaController;
 use App\Http\Controllers\PenyewaController;
 use App\Http\Controllers\TipeKamarController;
 use App\Http\Controllers\TransaksiPembayaranController;
 use App\Http\Controllers\TransaksiSewaController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('layouts.template');
+    return redirect()->route('login');
 });
 
 
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+
+// Route untuk proses login
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// Route untuk logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/dashboard', function () {
+    return view('dashboard'); 
+})->name('dashboard');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth'])->group(function(){
     Route::prefix('penyewa')->name('penyewa.')->group(function () {
         Route::post('/list', [PenyewaController::class, 'list']);
         Route::get('/', [PenyewaController::class, 'index']);
@@ -88,3 +105,20 @@ Route::get('/', function () {
         Route::delete('/{id}/delete', [TransaksiPembayaranController::class, 'delete']);
         Route::get('/{id}/generatePembayaran', [TransaksiPembayaranController::class, 'generatePembayaran']);
     });
+
+    
+        Route::prefix('user')->name('user.')->group(function () {
+
+            Route::post('/list', [UserController::class, 'list']);
+            Route::get('/', [UserController::class, 'index']);
+            Route::get('/create', [UserController::class, 'create']);
+            Route::post('/store', [UserController::class, 'store']);
+            Route::get('/{id}/show', [UserController::class, 'show']);
+            Route::get('/{id}/edit', [UserController::class, 'edit']);
+            Route::put('/{id}/update', [UserController::class, 'update']);
+            Route::get('/{id}/confirm', [UserController::class, 'confirm']);
+            Route::delete('/{id}/delete', [UserController::class, 'delete']);
+            
+        });
+
+});      

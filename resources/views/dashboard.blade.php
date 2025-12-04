@@ -14,7 +14,7 @@
     <div class="section-body">
 
         <div class="alert alert-primary">
-            Selamat datang, <strong>{{ Auth::user()->username }}</strong>!
+            Selamat datang, <strong>{{ Auth::check() ? Auth::user()->username : 'Guest' }}</strong>!
         </div>
 
         <div class="row">
@@ -32,10 +32,36 @@
                 </div>
             </div>
 
-            {{-- TOTAL PENYEWA --}}
+            {{-- KAMAR TERSEDIA --}}
             <div class="col-lg-3 col-md-6">
                 <div class="card card-statistic-1">
                     <div class="card-icon bg-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-wrap">
+                        <div class="card-header"><h4>Kamar Tersedia</h4></div>
+                        <div class="card-body">{{ $totalKamarTersedia }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- KAMAR DISEWA --}}
+            <div class="col-lg-3 col-md-6">
+                <div class="card card-statistic-1">
+                    <div class="card-icon bg-danger">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="card-wrap">
+                        <div class="card-header"><h4>Kamar Disewa</h4></div>
+                        <div class="card-body">{{ $totalKamarDisewa }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- TOTAL PENYEWA --}}
+            <div class="col-lg-3 col-md-6">
+                <div class="card card-statistic-1">
+                    <div class="card-icon bg-info">
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="card-wrap">
@@ -44,6 +70,10 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+
+        <div class="row">
 
             {{-- TOTAL PENGELOLA --}}
             <div class="col-lg-3 col-md-6">
@@ -61,7 +91,7 @@
             {{-- TOTAL TRANSAKSI BULAN INI --}}
             {{-- <div class="col-lg-3 col-md-6">
                 <div class="card card-statistic-1">
-                    <div class="card-icon bg-danger">
+                    <div class="card-icon bg-dark">
                         <i class="fas fa-money-bill-wave"></i>
                     </div>
                     <div class="card-wrap">

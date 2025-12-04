@@ -24,12 +24,12 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 // Route untuk logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', function () {
-    return view('dashboard'); 
-})->name('dashboard');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::middleware(['auth'])->group(function(){
+
+    Route::get('/dashboard', function () {return view('dashboard'); })->name('dashboard');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::prefix('penyewa')->name('penyewa.')->group(function () {
         Route::post('/list', [PenyewaController::class, 'list']);
         Route::get('/', [PenyewaController::class, 'index']);

@@ -7,7 +7,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF token for AJAX -->
 
   <!-- Title -->
-  <title>@yield('title') &mdash; Stisla</title>
+  <title>@yield('title') &mdash; Si-Kos</title>
 
   <!-- General CSS -->
   <link rel="stylesheet" href="{{ asset('stisla/node_modules/bootstrap/dist/css/bootstrap.min.css') }}">

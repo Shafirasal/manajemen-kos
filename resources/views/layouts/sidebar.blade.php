@@ -20,15 +20,22 @@
       <li class="dropdown">
         <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-columns"></i> 
           <span>Data Master</span></a>
-        <ul class="dropdown-menu">
-          <li><a class="nav-link" href="{{ url('/user') }}">Tambah User</a></li>
-          <li><a class="nav-link" href="{{ url('/penyewa') }}">Penyewa</a></li>
-          <li><a class="nav-link" href="{{ url('/pengelola') }}">Pengelola</a></li>
-          <li><a class="nav-link" href="{{ url('/tipe_kamar') }}">Tipe Kamar</a></li>
-          <li><a class="nav-link" href="{{ url('/kamar') }}">Kamar</a></li>
-          <li><a class="nav-link" href="{{ url('/transaksi_sewa') }}">Transaksi Sewa</a></li>
-          <li><a class="nav-link" href="{{ url('/transaksi_pembayaran') }}">Transaksi Pembayaran</a></li>
-        </ul>
+<ul class="dropdown-menu">
+
+    @if (auth()->user()->role == 'pemilik')
+        <li><a class="nav-link" href="{{ url('/user') }}">Tambah User</a></li>
+        <li><a class="nav-link" href="{{ url('/penyewa') }}">Penyewa</a></li>
+        <li><a class="nav-link" href="{{ url('/pengelola') }}">Pengelola</a></li>
+        <li><a class="nav-link" href="{{ url('/tipe_kamar') }}">Tipe Kamar</a></li>
+        <li><a class="nav-link" href="{{ url('/kamar') }}">Kamar</a></li>
+    @endif
+    @if (auth()->user()->role == 'operator' || auth()->user()->role == 'pemilik')
+        <li><a class="nav-link" href="{{ url('/transaksi_sewa') }}">Transaksi Sewa</a></li>
+        <li><a class="nav-link" href="{{ url('/transaksi_pembayaran') }}">Transaksi Pembayaran</a></li>
+    @endif
+</ul>
+
+
       </li>
 
     </ul>

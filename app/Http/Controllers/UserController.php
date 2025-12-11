@@ -12,9 +12,6 @@ use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
-    // ==============================
-    // INDEX
-    // ==============================
     public function index()
     {
         $breadcrumb = (object)[
@@ -33,9 +30,6 @@ class UserController extends Controller
         ]);
     }
 
-    // ==============================
-    // DATATABLE LIST
-    // ==============================
     public function list(Request $request)
     {
         $query = UserModel::with(['penyewa','pengelola']);
@@ -61,9 +55,6 @@ class UserController extends Controller
             ->make(true);
     }
 
-    // ==============================
-    // CREATE
-    // ==============================
     public function create()
     {
         return view('user.create', [
@@ -72,14 +63,11 @@ class UserController extends Controller
         ]);
     }
 
-    // ==============================
-    // STORE USER
-    // ==============================
     public function store(Request $request)
     {
         $rules = [
             'role'         => 'required|in:pemilik,operator,penyewa',
-            'username'     => 'required|unique:t_user,username',
+            'username'     => 'required|unique:t_user,username|min:1|max:40',
             'password'     => 'required|min:5',
             'id_pengelola' => 'nullable|exists:t_pengelola,id_pemilik',
             'id_penyewa'   => 'nullable|exists:t_penyewa,id_penyewa',
@@ -118,9 +106,7 @@ class UserController extends Controller
         return view('user.show', compact('user'));
     }
 
-    // ==============================
-    // EDIT
-    // ==============================
+
     public function edit($id)
     {
         $user = UserModel::find($id);
@@ -132,9 +118,6 @@ class UserController extends Controller
         ]);
     }
 
-    // ==============================
-    // UPDATE
-    // ==============================
     public function update(Request $request, $id)
     {
         $rules = [
@@ -176,9 +159,7 @@ class UserController extends Controller
         ]);
     }
 
-    // ==============================
-    // CONFIRM DELETE
-    // ==============================
+
     public function confirm($id)
     {
         return view('user.confirm', [
@@ -186,9 +167,7 @@ class UserController extends Controller
         ]);
     }
 
-    // ==============================
-    // DELETE
-    // ==============================
+
     public function delete($id)
     {
         $user = UserModel::find($id);

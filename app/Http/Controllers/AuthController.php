@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // ==========================
-    // FORM LOGIN
-    // ==========================
+
     public function showLoginForm()
     {
         if (Auth::check()) {
@@ -22,9 +20,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    // ==========================
-    // PROSES LOGIN
-    // ==========================
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -66,9 +62,6 @@ class AuthController extends Controller
 
     }
 
-    // ==========================
-    // LOGOUT
-    // ==========================
     public function logout(Request $request)
     {
         Auth::logout();

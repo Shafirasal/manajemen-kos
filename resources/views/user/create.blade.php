@@ -98,7 +98,7 @@ document.getElementById('role').addEventListener('change', function() {
 $(document).ready(function() {
     $("#form-tambah").validate({
         rules: {
-            username: { required: true },
+            username: { required: true, minlength: 1, maxlenght: 40 },
             role: { required: true },
             password: { required: true, minlength: 5 },
         },

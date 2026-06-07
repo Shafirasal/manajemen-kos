@@ -39,7 +39,7 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
         REMOTE_HOST: ${{ secrets.VPS_HOST }}
         REMOTE_USER: ${{ secrets.VPS_USER }}
-        TARGET: '/www/wwwroot/manajemen-kos'
+        TARGET: '/www/wwwroot/manajemen-kos-main'
         EXCLUDE: "/.git/, /.github/, /node_modules/"
 
     - name: Run Artisan Commands on Server

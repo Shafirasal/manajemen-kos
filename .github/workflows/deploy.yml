@@ -1,10 +1,8 @@
 name: Deploy Laravel to VPS
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,27 +10,27 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
         extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, pgsql, dom, filter, gd, json, libxml, openssl, pcre, phar, pdo, session, tokenizer, xml, xmlwriter, fileinfo
         coverage: none
-
     - name: Install Composer Dependencies
       run: composer install --no-ansi --no-interaction --prefer-dist --optimize-autoloader
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-
     - name: Install NPM Dependencies & Build Assets
       run: |
+        npm install -g yarn
+        cd public/stisla
+        yarn
+        yarn dist
+        cd ../..
         npm ci
         npm run build
-
     - name: Deploy to Server via rsync
       uses: easingthemes/ssh-deploy@v5.0.0
       env:
@@ -41,7 +39,6 @@ jobs:
         REMOTE_USER: ${{ secrets.VPS_USER }}
         TARGET: '/www/wwwroot/manajemen-kos-main'
         EXCLUDE: "/.git/, /.github/, /node_modules/"
-
     - name: Run Artisan Commands on Server
       uses: appleboy/ssh-action@v1.0.3
       with:
